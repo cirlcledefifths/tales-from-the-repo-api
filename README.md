@@ -1,1 +1,2 @@
-# tales-from-the-repo-api
+# tales-from-the-repo
+A blog about developers, for developers
