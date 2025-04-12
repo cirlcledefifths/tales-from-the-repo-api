@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using TalesFromRepoAPI.Core.Models;
 
 namespace TalesFromRepoAPI.Core.Models
 {
@@ -10,6 +9,6 @@ namespace TalesFromRepoAPI.Core.Models
         public string Username { get; set; }
         public string Email { get; set; }
         public DateTime CreatedAt { get; set; }
-        public List<Post> Posts { get; set; } = new List<Post>();
+        public List<Post> Posts { get; set; } = new List<Post>(); // return default []
     }
 }

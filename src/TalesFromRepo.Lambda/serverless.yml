@@ -1,0 +1,85 @@
+service: blog-api
+
+provider:
+  name: aws
+  runtime: dotnetcore3.1
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+package:
+  individually: true
+
+functions:
+  getAllPosts:
+    handler: BlogAPI.Lambda::BlogAPI.Lambda.Functions.PostFunctions::GetAllPosts
+    package:
+      artifact: bin/Release/netcoreapp3.1/deploy-package.zip
+    events:
+      - http:
+          path: posts
+          method: get
+          cors: true
+  
+  getPostById:
+    handler: BlogAPI.Lambda::BlogAPI.Lambda.Functions.PostFunctions::GetPostById
+    package:
+      artifact: bin/Release/netcoreapp3.1/deploy-package.zip
+    events:
+      - http:
+          path: posts/{id}
+          method: get
+          cors: true
+  
+  createPost:
+    handler: BlogAPI.Lambda::BlogAPI.Lambda.Functions.PostFunctions::CreatePost
+    package:
+      artifact: bin/Release/netcoreapp3.1/deploy-package.zip
+    events:
+      - http:
+          path: posts
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+resources:
+  Resources:
+    PostsTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+          - AttributeName: slug
+            AttributeType: S
+          - AttributeName: authorId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: slug-index
+            KeySchema:
+              - AttributeName: slug
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: author-index
+            KeySchema:
+              - AttributeName: authorId
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
