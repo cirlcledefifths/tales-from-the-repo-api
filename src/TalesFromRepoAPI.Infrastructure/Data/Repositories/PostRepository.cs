@@ -55,119 +55,119 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<Post> GetByIdAsync(Guid id)
-        {
-            var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString());
-            if (postEntity == null)
-            {
-                return null;
-            }
+        // public async Task<Post> GetByIdAsync(Guid id)
+        // {
+        //     var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString());
+        //     if (postEntity == null)
+        //     {
+        //         return null;
+        //     }
 
-            return MapToPost(postEntity);
-        }
+        //     return MapToPost(postEntity);
+        // }
 
-        public async Task<Post> GetBySlugAsync(string slug)
-        {
-            // Query the GSI for slug index
-            var search = _dynamoDbContext.QueryAsync<PostEntity>(
-                slug,
-                QueryOperator.Equal,
-                new List<object> { slug },
-                new DynamoDBOperationConfig
-                {
-                    IndexName = "slug-index"
-                });
+        // public async Task<Post> GetBySlugAsync(string slug)
+        // {
+        //     // Query the GSI for slug index
+        //     var search = _dynamoDbContext.QueryAsync<PostEntity>(
+        //         slug,
+        //         QueryOperator.Equal,
+        //         new List<object> { slug },
+        //         new DynamoDBOperationConfig
+        //         {
+        //             IndexName = "slug-index"
+        //         });
             
-            var posts = await search.GetRemainingAsync();
-            var postEntity = posts.FirstOrDefault();
+        //     var posts = await search.GetRemainingAsync();
+        //     var postEntity = posts.FirstOrDefault();
             
-            if (postEntity == null)
-            {
-                return null;
-            }
+        //     if (postEntity == null)
+        //     {
+        //         return null;
+        //     }
 
-            return MapToPost(postEntity);
-        }
+        //     return MapToPost(postEntity);
+        // }
 
-        public async Task<List<Post>> GetByAuthorAsync(Guid authorId)
-        {
-            // Query the GSI for author index
-            var search = _dynamoDbContext.QueryAsync<PostEntity>(
-                authorId.ToString(),
-                QueryOperator.Equal,
-                new List<object> { authorId.ToString() },
-                new DynamoDBOperationConfig
-                {
-                    IndexName = "author-index"
-                });
+        // public async Task<List<Post>> GetByAuthorAsync(Guid authorId)
+        // {
+        //     // Query the GSI for author index
+        //     var search = _dynamoDbContext.QueryAsync<PostEntity>(
+        //         authorId.ToString(),
+        //         QueryOperator.Equal,
+        //         new List<object> { authorId.ToString() },
+        //         new DynamoDBOperationConfig
+        //         {
+        //             IndexName = "author-index"
+        //         });
             
-            var postEntities = await search.GetRemainingAsync();
-            return postEntities.Select(entity => MapToPost(entity)).ToList();
-        }
+        //     var postEntities = await search.GetRemainingAsync();
+        //     return postEntities.Select(entity => MapToPost(entity)).ToList();
+        // }
 
-        public async Task<List<Post>> GetByTagAsync(string tag)
-        {
-            // DynamoDB doesn't directly support querying by list elements,
-            // so we'll scan with a filter
-            var filter = new ScanFilter();
-            filter.AddCondition("Tags", ScanOperator.Contains, tag);
+        // public async Task<List<Post>> GetByTagAsync(string tag)
+        // {
+        //     // DynamoDB doesn't directly support querying by list elements,
+        //     // so we'll scan with a filter
+        //     var filter = new ScanFilter();
+        //     filter.AddCondition("Tags", ScanOperator.Contains, tag);
             
-            var scanConfig = new ScanOperationConfig
-            {
-                Filter = filter
-            };
+        //     var scanConfig = new ScanOperationConfig
+        //     {
+        //         Filter = filter
+        //     };
 
-            var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
+        //     var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
             
-            var postEntities = new List<PostEntity>();
-            do
-            {
-                var page = await search.GetNextSetAsync();
-                postEntities.AddRange(page);
-            }
-            while (!search.IsDone);
+        //     var postEntities = new List<PostEntity>();
+        //     do
+        //     {
+        //         var page = await search.GetNextSetAsync();
+        //         postEntities.AddRange(page);
+        //     }
+        //     while (!search.IsDone);
 
-            return postEntities.Select(entity => MapToPost(entity)).ToList();
-        }
+        //     return postEntities.Select(entity => MapToPost(entity)).ToList();
+        // }
 
-        public async Task<Post> CreateAsync(Post post)
-        {
-            // Ensure the ID is set
-            if (post.Id == Guid.Empty)
-            {
-                post.Id = Guid.NewGuid();
-            }
+        // public async Task<Post> CreateAsync(Post post)
+        // {
+        //     // Ensure the ID is set
+        //     if (post.Id == Guid.Empty)
+        //     {
+        //         post.Id = Guid.NewGuid();
+        //     }
 
-            var postEntity = MapToEntity(post);
-            await _dynamoDbContext.SaveAsync(postEntity);
-            return MapToPost(postEntity);
-        }
+        //     var postEntity = MapToEntity(post);
+        //     await _dynamoDbContext.SaveAsync(postEntity);
+        //     return MapToPost(postEntity);
+        // }
 
-        public async Task<Post> UpdateAsync(Post post)
-        {
-            // First, check if the post exists
-            var existingPost = await GetByIdAsync(post.Id);
-            if (existingPost == null)
-            {
-                throw new KeyNotFoundException($"Post with ID {post.Id} not found.");
-            }
+        // public async Task<Post> UpdateAsync(Post post)
+        // {
+        //     // First, check if the post exists
+        //     var existingPost = await GetByIdAsync(post.Id);
+        //     if (existingPost == null)
+        //     {
+        //         throw new KeyNotFoundException($"Post with ID {post.Id} not found.");
+        //     }
 
-            var postEntity = MapToEntity(post);
-            await _dynamoDbContext.SaveAsync(postEntity);
-            return MapToPost(postEntity);
-        }
+        //     var postEntity = MapToEntity(post);
+        //     await _dynamoDbContext.SaveAsync(postEntity);
+        //     return MapToPost(postEntity);
+        // }
 
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            var existingPost = await GetByIdAsync(id);
-            if (existingPost == null)
-            {
-                return false;
-            }
+        // public async Task<bool> DeleteAsync(Guid id)
+        // {
+        //     var existingPost = await GetByIdAsync(id);
+        //     if (existingPost == null)
+        //     {
+        //         return false;
+        //     }
 
-            await _dynamoDbContext.DeleteAsync<PostEntity>(id.ToString());
-            return true;
-        }
+        //     await _dynamoDbContext.DeleteAsync<PostEntity>(id.ToString());
+        //     return true;
+        // }
 
         #region Private Helper Methods
 

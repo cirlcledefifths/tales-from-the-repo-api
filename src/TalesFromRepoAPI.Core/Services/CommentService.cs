@@ -20,29 +20,29 @@ namespace TalesFromRepoAPI.Core.Services
             return await _commentRepository.GetAllAsync();
         }
 
-        public async Task<Comment> GetByIdAsync(Guid id)
-        {
-            return await _commentRepository.GetByIdAsync(id);
-        }
+        // public async Task<Comment> GetByIdAsync(Guid id)
+        // {
+        //     return await _commentRepository.GetByIdAsync(id);
+        // }
 
-        public async Task<List<Comment>> GetByPostIdAsync(Guid postId)
-        {
-            return await _commentRepository.GetByPostIdAsync(postId);
-        }
+        // public async Task<List<Comment>> GetByPostIdAsync(Guid postId)
+        // {
+        //     return await _commentRepository.GetByPostIdAsync(postId);
+        // }
 
-        public async Task<Comment> CreateAsync(Comment comment)
-        {
-            return await _commentRepository.CreateAsync(comment);
-        }
+        // public async Task<Comment> CreateAsync(Comment comment)
+        // {
+        //     return await _commentRepository.CreateAsync(comment);
+        // }
 
-        public async Task<Comment> UpdateAsync(Comment comment)
-        {
-            return await _commentRepository.UpdateAsync(comment);
-        }
+        // public async Task<Comment> UpdateAsync(Comment comment)
+        // {
+        //     return await _commentRepository.UpdateAsync(comment);
+        // }
 
-        public async Task<bool> DeleteAsync(Guid id)
-        {
-            return await _commentRepository.DeleteAsync(id);
-        }
+        // public async Task<bool> DeleteAsync(Guid id)
+        // {
+        //     return await _commentRepository.DeleteAsync(id);
+        // }
     }
 }
