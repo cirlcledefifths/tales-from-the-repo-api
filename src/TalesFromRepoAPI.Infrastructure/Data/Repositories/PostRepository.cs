@@ -2,56 +2,68 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TalesFromRepoAPI.Core.Interfaces;
 using TalesFromRepoAPI.Core.Models;
 using TalesFromRepoAPI.Infrastructure.Data.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
 {
     public class PostRepository : IPostRepository
     {
         private readonly IDynamoDBContext _dynamoDbContext;
+        private readonly ILogger<PostRepository> _logger;
 
-        public PostRepository(IDynamoDBContext dynamoDbContext)
+        public PostRepository(IDynamoDBContext dynamoDbContext, ILogger<PostRepository> logger)
         {
             _dynamoDbContext = dynamoDbContext ?? throw new ArgumentNullException(nameof(dynamoDbContext));
+
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<List<Post>> GetAllAsync(bool includeUnpublished = false)
         {
-            // If we want published posts only, we need to filter
-            if (!includeUnpublished)
-            {
-                var filter = new ScanFilter();
-                filter.AddCondition("Published", ScanOperator.Equal, true);
-                
-                var scanConfig = new ScanOperationConfig
+            try {
+                // If we want published posts only, we need to filter
+                if (!includeUnpublished)
                 {
-                    Filter = filter,
-                    ConsistentRead = true
-                };
+                    var filter = new ScanFilter();
+                    filter.AddCondition("Published", ScanOperator.Equal, true);
 
-                var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
-                
-                var postEntities = new List<PostEntity>();
-                do
+                    var scanConfig = new ScanOperationConfig
+                    {
+                        ConsistentRead = true
+                    };
+                    var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
+                    _logger.LogInformation("First result assigned");
+                    var postEntities = new List<PostEntity>();
+                    do
+                    {
+                        var page = await search.GetNextSetAsync();
+                        postEntities.AddRange(page);
+                    }
+                    while (!search.IsDone);
+                    _logger.LogInformation($"Successful scan!!");
+                    _logger.LogInformation($"postEntities count: {postEntities.Count}");
+                    return postEntities.Select(entity => MapToPost(entity)).ToList();
+
+                }
+                else
                 {
-                    var page = await search.GetNextSetAsync();
-                    postEntities.AddRange(page);
-                } 
-                while (!search.IsDone);
-
-                return postEntities.Select(entity => MapToPost(entity)).ToList();
+                    _logger.LogInformation("...About to scan");
+                    var search = _dynamoDbContext.ScanAsync<PostEntity>(new List<ScanCondition>());
+                    var postEntities = await search.GetRemainingAsync();
+                    return postEntities.Select(entity => MapToPost(entity)).ToList();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Get all posts without filtering
-                var search = _dynamoDbContext.ScanAsync<PostEntity>(new List<ScanCondition>());
-                var postEntities = await search.GetRemainingAsync();
-                return postEntities.Select(entity => MapToPost(entity)).ToList();
+                _logger.LogError(ex, "Error fetching posts from DynamoDB");
+                throw;
             }
         }
 
@@ -77,10 +89,10 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         {
         //             IndexName = "slug-index"
         //         });
-            
+
         //     var posts = await search.GetRemainingAsync();
         //     var postEntity = posts.FirstOrDefault();
-            
+
         //     if (postEntity == null)
         //     {
         //         return null;
@@ -100,7 +112,7 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         {
         //             IndexName = "author-index"
         //         });
-            
+
         //     var postEntities = await search.GetRemainingAsync();
         //     return postEntities.Select(entity => MapToPost(entity)).ToList();
         // }
@@ -111,14 +123,14 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //     // so we'll scan with a filter
         //     var filter = new ScanFilter();
         //     filter.AddCondition("Tags", ScanOperator.Contains, tag);
-            
+
         //     var scanConfig = new ScanOperationConfig
         //     {
         //         Filter = filter
         //     };
 
         //     var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
-            
+
         //     var postEntities = new List<PostEntity>();
         //     do
         //     {
@@ -173,8 +185,9 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
 
         private Post MapToPost(PostEntity entity)
         {
+            _logger.LogInformation($"IsNull = {entity == null}");
             if (entity == null) return null;
-
+            _logger.LogInformation($"Mapping post entity {JsonSerializer.Serialize(entity)}");
             return new Post
             {
                 Id = Guid.Parse(entity.Id),

@@ -7,19 +7,19 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Entities
     [DynamoDBTable("Posts")]
     public class PostEntity
     {
-        [DynamoDBHashKey]
+        [DynamoDBHashKey] // Partition Key
         public string Id { get; set; }
 
-        [DynamoDBProperty]
+        [DynamoDBRangeKey] // Sort Key
         public string Title { get; set; }
 
         [DynamoDBProperty]
         public string Content { get; set; }
 
-        [DynamoDBGlobalSecondaryIndexHashKey("slug-index")]
+        [DynamoDBProperty]
         public string Slug { get; set; }
 
-        [DynamoDBGlobalSecondaryIndexHashKey("author-index")]
+        [DynamoDBProperty]
         public string AuthorId { get; set; }
 
         [DynamoDBProperty]

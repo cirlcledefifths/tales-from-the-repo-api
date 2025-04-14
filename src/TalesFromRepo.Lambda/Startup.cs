@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.DynamoDBv2.DataModel;
@@ -20,6 +21,12 @@ namespace TalesFromRepoAPI.Lambda
 
             // Set up dependency injection
             var serviceCollection = new ServiceCollection();
+
+            serviceCollection.AddLogging(configure =>
+            {
+                configure.AddConsole();
+                configure.SetMinimumLevel(LogLevel.Information); // Ensure logs at or above Information level are captured
+            });
 
             // Add AWS services
             serviceCollection.AddDefaultAWSOptions(new AWSOptions

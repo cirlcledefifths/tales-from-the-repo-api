@@ -26,9 +26,12 @@ namespace TalesFromRepoAPI.Lambda.Functions
 
         public async Task<APIGatewayProxyResponse> GetAllPosts(APIGatewayProxyRequest request, ILambdaContext context)
         {
+            context.Logger.LogLine($"Executing function: {request}");
+            
             try
             {
                 var posts = await _postService.GetAllPostsAsync();
+                context.Logger.LogLine($"Successfully retreived Posts {posts.Count}");
                 
                 return new APIGatewayProxyResponse
                 {
