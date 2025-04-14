@@ -9,10 +9,9 @@ namespace TalesFromRepoAPI.Core.Interfaces
     {
         Task<List<Post>> GetAllAsync(bool includeUnpublished = false);
         Task<Post> GetByIdAsync(Guid id);
-        // Task<Post> GetBySlugAsync(string slug);
+        Task<Post> CreatePostAsync(Post post);
         // Task<List<Post>> GetByAuthorAsync(Guid authorId);
         // Task<List<Post>> GetByTagAsync(string tag);
-        // Task<Post> CreateAsync(Post post);
         // Task<Post> UpdateAsync(Post post);
         // Task<bool> DeleteAsync(Guid id);
     }

@@ -80,29 +80,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             return MapToPost(postEntity);
         }
 
-        // public async Task<Post> GetBySlugAsync(string slug)
-        // {
-        //     // Query the GSI for slug index
-        //     var search = _dynamoDbContext.QueryAsync<PostEntity>(
-        //         slug,
-        //         QueryOperator.Equal,
-        //         new List<object> { slug },
-        //         new DynamoDBOperationConfig
-        //         {
-        //             IndexName = "slug-index"
-        //         });
-
-        //     var posts = await search.GetRemainingAsync();
-        //     var postEntity = posts.FirstOrDefault();
-
-        //     if (postEntity == null)
-        //     {
-        //         return null;
-        //     }
-
-        //     return MapToPost(postEntity);
-        // }
-
         // public async Task<List<Post>> GetByAuthorAsync(Guid authorId)
         // {
         //     // Query the GSI for author index
@@ -144,18 +121,18 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //     return postEntities.Select(entity => MapToPost(entity)).ToList();
         // }
 
-        // public async Task<Post> CreateAsync(Post post)
-        // {
-        //     // Ensure the ID is set
-        //     if (post.Id == Guid.Empty)
-        //     {
-        //         post.Id = Guid.NewGuid();
-        //     }
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            // Ensure the ID is set
+            if (post.Id == Guid.Empty)
+            {
+                post.Id = Guid.NewGuid();
+            }
 
-        //     var postEntity = MapToEntity(post);
-        //     await _dynamoDbContext.SaveAsync(postEntity);
-        //     return MapToPost(postEntity);
-        // }
+            var postEntity = MapToEntity(post);
+            await _dynamoDbContext.SaveAsync(postEntity);
+            return MapToPost(postEntity);
+        }
 
         // public async Task<Post> UpdateAsync(Post post)
         // {
@@ -201,8 +178,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
                 UpdatedAt = entity.UpdatedAt,
                 Tags = entity.Tags ?? new List<string>(),
                 Published = entity.Published,
-                // Note: We're not loading the Author and Comments here
-                // Those would typically be loaded separately or via a join operation
             };
         }
 

@@ -6,8 +6,8 @@ using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.Core;
 using TalesFromRepoAPI.Core.Models;
 using TalesFromRepoAPI.Core.Services;
-// using TalesFromRepoAPI.Lambda.Models.Requests;
-using TalesFromRepoAPI.Lambda.Models.Responses;
+using TalesFromRepo.Lambda.Models.Requests;
+using TalesFromRepo.Lambda.Models.Responses;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
@@ -108,57 +108,58 @@ namespace TalesFromRepoAPI.Lambda.Functions
             }
         }
 
-        // public async Task<APIGatewayProxyResponse> CreatePost(APIGatewayProxyRequest request, ILambdaContext context)
-        // {
-        //     try
-        //     {
-        //         var createRequest = JsonConvert.DeserializeObject<CreatePostRequest>(request.Body);
+        public async Task<APIGatewayProxyResponse> CreatePost(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            try
+            {
+                context.Logger.LogLine("Executing CreatePost....");
+                context.Logger.LogLine($"Request Body: {request.Body}");
+                var createRequest = JsonConvert.DeserializeObject<CreatePostRequest>(request.Body);
+                context.Logger.LogLine($"Successfully deserialized request {createRequest?.Title}");
+                if (createRequest == null || string.IsNullOrEmpty(createRequest.Title) || string.IsNullOrEmpty(createRequest.Content))
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Title and content are required." }),
+                        Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                    };
+                }
+
+                var post = new Post
+                {
+                    Id = Guid.NewGuid(),
+                    Title = createRequest.Title,
+                    Content = createRequest.Content,
+                    // Author = createRequest.Author,
+                    AuthorId = Guid.NewGuid(),
+                    Tags = createRequest.Tags ?? new List<string>(),
+                    Published = (bool)createRequest.Published
+                };
+
+                var createdPost = await _postService.CreatePostAsync(post);
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.Created,
+                    Body = JsonConvert.SerializeObject(createdPost),
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogLine($"Error creating post: {ex.Message}");
                 
-        //         if (createRequest == null || string.IsNullOrEmpty(createRequest.Title) || string.IsNullOrEmpty(createRequest.Content))
-        //         {
-        //             return new APIGatewayProxyResponse
-        //             {
-        //                 StatusCode = (int)HttpStatusCode.BadRequest,
-        //                 Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Title and content are required." }),
-        //                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //             };
-        //         }
-
-        //         // In a real app, get the user ID from auth context
-        //         var userId = Guid.Parse("00000000-0000-0000-0000-000000000001");
-
-        //         var post = new Post
-        //         {
-        //             Title = createRequest.Title,
-        //             Content = createRequest.Content,
-        //             AuthorId = userId,
-        //             Tags = createRequest.Tags ?? new List<string>(),
-        //             Published = createRequest.Published
-        //         };
-
-        //         var createdPost = await _postService.CreatePostAsync(post);
-
-        //         return new APIGatewayProxyResponse
-        //         {
-        //             StatusCode = (int)HttpStatusCode.Created,
-        //             Body = JsonConvert.SerializeObject(createdPost),
-        //             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //         };
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         context.Logger.LogLine($"Error creating post: {ex.Message}");
-                
-        //         return new APIGatewayProxyResponse
-        //         {
-        //             StatusCode = (int)HttpStatusCode.InternalServerError,
-        //             Body = JsonConvert.SerializeObject(new ErrorResponse 
-        //             { 
-        //                 Message = "An error occurred while creating the post."
-        //             }),
-        //             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //         };
-        //     }
-        // }
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Body = JsonConvert.SerializeObject(new ErrorResponse 
+                    { 
+                        Message = "An error occurred while creating the post."
+                    }),
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                };
+            }
+        }
     }
 }

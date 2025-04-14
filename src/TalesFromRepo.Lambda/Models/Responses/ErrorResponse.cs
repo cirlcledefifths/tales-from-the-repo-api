@@ -1,4 +1,4 @@
-namespace TalesFromRepoAPI.Lambda.Models.Responses
+namespace TalesFromRepo.Lambda.Models.Responses
 {
     public class ErrorResponse
     {

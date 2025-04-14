@@ -25,10 +25,10 @@ namespace TalesFromRepoAPI.Core.Services
             return await _postRepository.GetByIdAsync(id);
         }
 
-        // public async Task<Post> GetPostBySlugAsync(string slug)
-        // {
-        //     return await _postRepository.GetBySlugAsync(slug);
-        // }
+        public async Task<Post> CreatePostAsync(Post post)
+        {
+            return await _postRepository.CreatePostAsync(post);
+        }
 
         // public async Task<List<Post>> GetPostsByAuthorAsync(Guid authorId)
         // {
@@ -40,10 +40,6 @@ namespace TalesFromRepoAPI.Core.Services
         //     return await _postRepository.GetByTagAsync(tag);
         // }
 
-        // public async Task<Post> CreatePostAsync(Post post)
-        // {
-        //     return await _postRepository.CreateAsync(post);
-        // }
         // public async Task<Post> UpdatePostAsync(Post post)
         // {
         //     return await _postRepository.UpdateAsync(post);
