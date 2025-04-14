@@ -20,10 +20,10 @@ namespace TalesFromRepoAPI.Core.Services
             return await _postRepository.GetAllAsync(includeUnpublished);
         }
 
-        // public async Task<Post> GetPostByIdAsync(Guid id)
-        // {
-        //     return await _postRepository.GetByIdAsync(id);
-        // }
+        public async Task<Post> GetPostByIdAsync(Guid id, string title)
+        {
+            return await _postRepository.GetByIdAsync(id, title);
+        }
 
         // public async Task<Post> GetPostBySlugAsync(string slug)
         // {

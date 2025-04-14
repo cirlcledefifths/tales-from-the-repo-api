@@ -56,54 +56,67 @@ namespace TalesFromRepoAPI.Lambda.Functions
             }
         }
 
-        // public async Task<APIGatewayProxyResponse> GetPostById(APIGatewayProxyRequest request, ILambdaContext context)
-        // {
-        //     try
-        //     {
-        //         if (!request.PathParameters.TryGetValue("id", out var idStr) || !Guid.TryParse(idStr, out var id))
-        //         {
-        //             return new APIGatewayProxyResponse
-        //             {
-        //                 StatusCode = (int)HttpStatusCode.BadRequest,
-        //                 Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Invalid post ID." }),
-        //                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //             };
-        //         }
+        public async Task<APIGatewayProxyResponse> GetPostById(APIGatewayProxyRequest request, ILambdaContext context)
+        {
+            context.Logger.LogLine("Executing GetPostById....");
+            try
+            {
+                context.Logger.LogLine($"Request Body: {request.PathParameters}");
+                if (!request.PathParameters.TryGetValue("id", out var idStr) || !Guid.TryParse(idStr, out var id))
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Invalid post ID." }),
+                        Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                    };
+                }
 
-        //         var post = await _postService.GetPostByIdAsync(id);
-                
-        //         if (post == null)
-        //         {
-        //             return new APIGatewayProxyResponse
-        //             {
-        //                 StatusCode = (int)HttpStatusCode.NotFound,
-        //                 Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Post not found." }),
-        //                 Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //             };
-        //         }
+                if (!request.PathParameters.TryGetValue("title", out var titleStr))
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.BadRequest,
+                        Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Invalid post title." }),
+                        Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                    };
+                }
 
-        //         return new APIGatewayProxyResponse
-        //         {
-        //             StatusCode = (int)HttpStatusCode.OK,
-        //             Body = JsonConvert.SerializeObject(post),
-        //             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //         };
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         context.Logger.LogLine($"Error getting post: {ex.Message}");
+                context.Logger.LogLine("Getting post from db....");
+                var post = await _postService.GetPostByIdAsync(id, titleStr);
+                context.Logger.LogLine($" Successfully retreived Post {post?.Title}");
+                if (post == null)
+                {
+                    return new APIGatewayProxyResponse
+                    {
+                        StatusCode = (int)HttpStatusCode.NotFound,
+                        Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Post not found." }),
+                        Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                    };
+                }
+
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.OK,
+                    Body = JsonConvert.SerializeObject(post),
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                };
+            }
+            catch (Exception ex)
+            {
+                context.Logger.LogLine($"Error getting post in GetPostById: {ex.Message}");
                 
-        //         return new APIGatewayProxyResponse
-        //         {
-        //             StatusCode = (int)HttpStatusCode.InternalServerError,
-        //             Body = JsonConvert.SerializeObject(new ErrorResponse 
-        //             { 
-        //                 Message = "An error occurred while retrieving the post."
-        //             }),
-        //             Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-        //         };
-        //     }
-        // }
+                return new APIGatewayProxyResponse
+                {
+                    StatusCode = (int)HttpStatusCode.InternalServerError,
+                    Body = JsonConvert.SerializeObject(new ErrorResponse 
+                    { 
+                        Message = "An error occurred while retrieving the post."
+                    }),
+                    Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
+                };
+            }
+        }
 
         // public async Task<APIGatewayProxyResponse> CreatePost(APIGatewayProxyRequest request, ILambdaContext context)
         // {

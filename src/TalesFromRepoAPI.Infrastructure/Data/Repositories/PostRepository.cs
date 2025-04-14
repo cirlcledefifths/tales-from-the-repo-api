@@ -67,16 +67,18 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             }
         }
 
-        // public async Task<Post> GetByIdAsync(Guid id)
-        // {
-        //     var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString());
-        //     if (postEntity == null)
-        //     {
-        //         return null;
-        //     }
-
-        //     return MapToPost(postEntity);
-        // }
+        public async Task<Post> GetByIdAsync(Guid id, string title)
+        {
+            _logger.LogInformation("Getting post in Repository...");
+            var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString(), title);
+            if (postEntity == null)
+            {
+                _logger.LogInformation($"Post with ID {id} not found.");
+                return null;
+            }
+            _logger.LogInformation($"Mapping post entity {JsonSerializer.Serialize(postEntity)}");
+            return MapToPost(postEntity);
+        }
 
         // public async Task<Post> GetBySlugAsync(string slug)
         // {
