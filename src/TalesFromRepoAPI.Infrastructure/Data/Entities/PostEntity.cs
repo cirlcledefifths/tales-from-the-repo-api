@@ -10,7 +10,7 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Entities
         [DynamoDBHashKey] // Partition Key
         public string Id { get; set; }
 
-        [DynamoDBRangeKey] // Sort Key
+        [DynamoDBProperty] // Sort Key
         public string Title { get; set; }
 
         [DynamoDBProperty]

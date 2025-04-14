@@ -1,0 +1,40 @@
+{
+    "Items": [
+        {
+            "UpdatedAt": {
+                "S": "2025-04-13T15:30:00Z"
+            },
+            "Title": {
+                "S": "This is a post"
+            },
+            "Content": {
+                "S": "This is some content"
+            },
+            "Slug": {
+                "S": "this_is_a_post"
+            },
+            "Id": {
+                "S": "3f8c2a1e-4b7d-4d9a-9f5b-8c3e7a2d6f1b"
+            },
+            "Published": {
+                "BOOL": true
+            },
+            "AuthorId": {
+                "S": "d4f8c9a7-2b3e-4f6a-8c1d-9e7b3a6d5f2c"
+            },
+            "CreatedAt": {
+                "S": "2025-04-13T15:30:00Z"
+            },
+            "Tags": {
+                "L": [
+                    {
+                        "S": "tag1"
+                    }
+                ]
+            }
+        }
+    ],
+    "Count": 1,
+    "ScannedCount": 1,
+    "ConsumedCapacity": null
+}

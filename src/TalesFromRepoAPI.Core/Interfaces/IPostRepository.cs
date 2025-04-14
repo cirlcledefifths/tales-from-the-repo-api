@@ -8,7 +8,7 @@ namespace TalesFromRepoAPI.Core.Interfaces
     public interface IPostRepository
     {
         Task<List<Post>> GetAllAsync(bool includeUnpublished = false);
-        Task<Post> GetByIdAsync(Guid id, string title);
+        Task<Post> GetByIdAsync(Guid id);
         // Task<Post> GetBySlugAsync(string slug);
         // Task<List<Post>> GetByAuthorAsync(Guid authorId);
         // Task<List<Post>> GetByTagAsync(string tag);

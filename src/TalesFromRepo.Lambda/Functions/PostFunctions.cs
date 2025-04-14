@@ -72,18 +72,8 @@ namespace TalesFromRepoAPI.Lambda.Functions
                     };
                 }
 
-                if (!request.PathParameters.TryGetValue("title", out var titleStr))
-                {
-                    return new APIGatewayProxyResponse
-                    {
-                        StatusCode = (int)HttpStatusCode.BadRequest,
-                        Body = JsonConvert.SerializeObject(new ErrorResponse { Message = "Invalid post title." }),
-                        Headers = new Dictionary<string, string> { { "Content-Type", "application/json" } }
-                    };
-                }
-
                 context.Logger.LogLine("Getting post from db....");
-                var post = await _postService.GetPostByIdAsync(id, titleStr);
+                var post = await _postService.GetPostByIdAsync(id);
                 context.Logger.LogLine($" Successfully retreived Post {post?.Title}");
                 if (post == null)
                 {

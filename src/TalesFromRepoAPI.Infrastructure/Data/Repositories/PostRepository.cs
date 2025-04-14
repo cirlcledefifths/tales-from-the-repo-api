@@ -67,10 +67,10 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             }
         }
 
-        public async Task<Post> GetByIdAsync(Guid id, string title)
+        public async Task<Post> GetByIdAsync(Guid id)
         {
             _logger.LogInformation("Getting post in Repository...");
-            var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString(), title);
+            var postEntity = await _dynamoDbContext.LoadAsync<PostEntity>(id.ToString());
             if (postEntity == null)
             {
                 _logger.LogInformation($"Post with ID {id} not found.");
