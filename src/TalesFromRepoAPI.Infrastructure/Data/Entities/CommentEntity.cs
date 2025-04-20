@@ -10,14 +10,14 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Entities
         [DynamoDBHashKey]
         public string Id { get; set; }
 
-        [DynamoDBProperty]
-        public string Content { get; set; }
-
         [DynamoDBGlobalSecondaryIndexHashKey("post-index")]
         public string PostId { get; set; }
 
-        [DynamoDBGlobalSecondaryIndexHashKey("author-index")]
-        public string AuthorId { get; set; }
+        [DynamoDBGlobalSecondaryIndexHashKey("user-index")]
+        public string UserId { get; set; }
+
+        [DynamoDBProperty]
+        public string Content { get; set; }
 
         [DynamoDBProperty]
         public DateTime CreatedAt { get; set; }

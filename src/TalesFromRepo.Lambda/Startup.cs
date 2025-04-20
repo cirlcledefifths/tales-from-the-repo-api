@@ -1,12 +1,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Amazon.Lambda.Core;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.DynamoDBv2.DataModel;
 using TalesFromRepoAPI.Core.Interfaces;
 using TalesFromRepoAPI.Core.Services;
 using TalesFromRepoAPI.Infrastructure.Data.Repositories;
+
+[assembly: LambdaSerializer(typeof(Amazon.Lambda.Serialization.SystemTextJson.DefaultLambdaJsonSerializer))]
 
 namespace TalesFromRepoAPI.Lambda
 {
@@ -25,13 +28,13 @@ namespace TalesFromRepoAPI.Lambda
             serviceCollection.AddLogging(configure =>
             {
                 configure.AddConsole();
-                configure.SetMinimumLevel(LogLevel.Information); // Ensure logs at or above Information level are captured
+                configure.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information); // Ensure logs at or above Information level are captured
             });
 
             // Add AWS services
             serviceCollection.AddDefaultAWSOptions(new AWSOptions
             {
-                Region = Amazon.RegionEndpoint.USEast1 // Change to your region
+                Region = Amazon.RegionEndpoint.USEast2 // Change to your region
             });
             serviceCollection.AddAWSService<IAmazonDynamoDB>();
 

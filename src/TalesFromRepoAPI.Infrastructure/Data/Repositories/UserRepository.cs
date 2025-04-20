@@ -2,29 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using TalesFromRepoAPI.Core.Interfaces;
 using TalesFromRepoAPI.Core.Models;
 using TalesFromRepoAPI.Infrastructure.Data.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly IAmazonDynamoDB _dynamoDb;
-        private readonly DynamoDBContext _context;
+       private readonly IDynamoDBContext _dynamoDbContext;
+        private readonly ILogger<PostRepository> _logger;
 
-        public UserRepository(IAmazonDynamoDB dynamoDb)
+        public UserRepository(IDynamoDBContext dynamoDbContext, ILogger<PostRepository> logger)
         {
-            _dynamoDb = dynamoDb;
-            _context = new DynamoDBContext(_dynamoDb);
+            _dynamoDbContext = dynamoDbContext ?? throw new ArgumentNullException(nameof(dynamoDbContext));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<List<User>> GetAllAsync()
         {
-            var search = _context.ScanAsync<UserEntity>(new List<ScanCondition>());
+            var search = _dynamoDbContext.ScanAsync<UserEntity>(new List<ScanCondition>());
             var users = await search.GetRemainingAsync();
             return users.Select(u => new User
             {
@@ -32,10 +34,7 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
                 Username = u.Username,
                 Email = u.Email,
                 CreatedAt = u.CreatedAt,
-                Posts = u.Posts.Select(p => new Post
-                {
-                    Id = Guid.Parse(p)
-                }).ToList()
+                UpdatedAt = u.UpdatedAt
             }).ToList();
         }
 
@@ -71,15 +70,27 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //     };
         // }
 
-        // public async Task<User> CreateAsync(User user)
-        // {
-        //     var userEntity = new UserEntity
-        //     {
-        //         Id = user.Id.ToString(),
-        //         Username = user.Username,
-        //         Email = user.Email,
-        //         CreatedAt = DateTime.UtcNow
-        //     };
+        public async Task<User> CreateAsync(User user)
+        {
+            try {
+                var userEntity = new UserEntity
+                {
+                    Id = user.Id.ToString(),
+                    Username = user.Username,
+                    Email = user.Email,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                
+                await _dynamoDbContext.SaveAsync(userEntity);
+                return MapToUser(userEntity);
+            }
+            catch(Exception ex) {
+                // Handle exceptions (e.g., log them)
+                Console.WriteLine($"Error creating user: {ex.Message}");
+                return null;
+            }
+        }
 
         //     await _context.SaveAsync(userEntity);
         //     return user;
@@ -105,5 +116,23 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //     await _context.DeleteAsync(userEntity);
         //     return true;
         // }
+
+        #region Private Helper Methods
+
+        private User MapToUser(UserEntity entity)
+        {
+            if (entity == null) return null;
+            _logger.LogInformation($"Mapping user entity {JsonSerializer.Serialize(entity)}");
+            return new User
+            {
+                Id = Guid.Parse(entity.Id),
+                Username = entity.Username,
+                Email = entity.Email,
+                CreatedAt = entity.CreatedAt,
+                UpdatedAt = entity.UpdatedAt,
+            };
+        }
+
+        #endregion Private Helper Methods
     }
 }

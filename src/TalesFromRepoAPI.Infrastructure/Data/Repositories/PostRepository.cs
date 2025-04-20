@@ -21,7 +21,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         public PostRepository(IDynamoDBContext dynamoDbContext, ILogger<PostRepository> logger)
         {
             _dynamoDbContext = dynamoDbContext ?? throw new ArgumentNullException(nameof(dynamoDbContext));
-
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
@@ -34,19 +33,20 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
                     var filter = new ScanFilter();
                     filter.AddCondition("Published", ScanOperator.Equal, true);
 
-                    var scanConfig = new ScanOperationConfig
-                    {
-                        ConsistentRead = true
-                    };
-                    var search = _dynamoDbContext.FromScanAsync<PostEntity>(scanConfig);
+                    // var scanConfig = new ScanOperationConfig
+                    // {
+                    //     ConsistentRead = true
+                    // };
+                    var search = _dynamoDbContext.ScanAsync<PostEntity>(new List<ScanCondition>());
                     _logger.LogInformation("First result assigned");
-                    var postEntities = new List<PostEntity>();
-                    do
-                    {
-                        var page = await search.GetNextSetAsync();
-                        postEntities.AddRange(page);
-                    }
-                    while (!search.IsDone);
+                    var postEntities = await search.GetRemainingAsync();
+                    
+                    // do
+                    // {
+                    //     var page = await search.GetNextSetAsync();
+                    //     postEntities.AddRange(page);
+                    // }
+                    // while (!search.IsDone);
                     _logger.LogInformation($"Successful scan!!");
                     _logger.LogInformation($"postEntities count: {postEntities.Count}");
                     return postEntities.Select(entity => MapToPost(entity)).ToList();
@@ -79,18 +79,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             _logger.LogInformation($"Mapping post entity {JsonSerializer.Serialize(postEntity)}");
             return MapToPost(postEntity);
         }
-
-        // public async Task<List<Post>> GetByAuthorAsync(Guid authorId)
-        // {
-        //     // Query the GSI for author index
-        //     var search = _dynamoDbContext.QueryAsync<PostEntity>(
-        //         authorId.ToString(),
-        //         QueryOperator.Equal,
-        //         new List<object> { authorId.ToString() },
-        //         new DynamoDBOperationConfig
-        //         {
-        //             IndexName = "author-index"
-        //         });
 
         //     var postEntities = await search.GetRemainingAsync();
         //     return postEntities.Select(entity => MapToPost(entity)).ToList();
@@ -134,37 +122,35 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             return MapToPost(postEntity);
         }
 
-        // public async Task<Post> UpdateAsync(Post post)
-        // {
-        //     // First, check if the post exists
-        //     var existingPost = await GetByIdAsync(post.Id);
-        //     if (existingPost == null)
-        //     {
-        //         throw new KeyNotFoundException($"Post with ID {post.Id} not found.");
-        //     }
+        public async Task<Post> UpdateAsync(Post post)
+        {
+            var existingPost = await GetByIdAsync(post.Id);
+            if (existingPost == null)
+            {
+                throw new KeyNotFoundException($"Post with ID {post.Id} not found.");
+            }
+            post.UpdatedAt = DateTime.UtcNow;
+            var postEntity = MapToEntity(post);
+            await _dynamoDbContext.SaveAsync(postEntity);
+            return MapToPost(postEntity);
+        }
 
-        //     var postEntity = MapToEntity(post);
-        //     await _dynamoDbContext.SaveAsync(postEntity);
-        //     return MapToPost(postEntity);
-        // }
+        public async Task<bool> DeleteAsync(Guid id)
+        {
+            var existingPost = await GetByIdAsync(id);
+            if (existingPost == null)
+            {
+                return false;
+            }
 
-        // public async Task<bool> DeleteAsync(Guid id)
-        // {
-        //     var existingPost = await GetByIdAsync(id);
-        //     if (existingPost == null)
-        //     {
-        //         return false;
-        //     }
-
-        //     await _dynamoDbContext.DeleteAsync<PostEntity>(id.ToString());
-        //     return true;
-        // }
+            await _dynamoDbContext.DeleteAsync<PostEntity>(id.ToString());
+            return true;
+        }
 
         #region Private Helper Methods
 
         private Post MapToPost(PostEntity entity)
         {
-            _logger.LogInformation($"IsNull = {entity == null}");
             if (entity == null) return null;
             _logger.LogInformation($"Mapping post entity {JsonSerializer.Serialize(entity)}");
             return new Post
@@ -172,8 +158,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
                 Id = Guid.Parse(entity.Id),
                 Title = entity.Title,
                 Content = entity.Content,
-                Slug = entity.Slug,
-                AuthorId = Guid.Parse(entity.AuthorId),
                 CreatedAt = entity.CreatedAt,
                 UpdatedAt = entity.UpdatedAt,
                 Tags = entity.Tags ?? new List<string>(),
@@ -190,8 +174,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
                 Id = post.Id.ToString(),
                 Title = post.Title,
                 Content = post.Content,
-                Slug = post.Slug,
-                AuthorId = post.AuthorId.ToString(),
                 CreatedAt = post.CreatedAt,
                 UpdatedAt = post.UpdatedAt,
                 Tags = post.Tags ?? new List<string>(),

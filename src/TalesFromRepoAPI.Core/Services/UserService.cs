@@ -30,10 +30,10 @@ namespace TalesFromRepoAPI.Core.Services
         //     return await _userRepository.GetByUsernameAsync(username);
         // }
 
-        // public async Task<User> CreateAsync(User user)
-        // {
-        //     return await _userRepository.CreateAsync(user);
-        // }
+        public async Task<User> CreateAsync(User user)
+        {
+            return await _userRepository.CreateAsync(user);
+        }
 
         // public async Task<User> UpdateAsync(User user)
         // {

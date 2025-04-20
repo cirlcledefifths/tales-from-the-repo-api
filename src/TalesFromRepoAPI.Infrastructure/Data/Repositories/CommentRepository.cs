@@ -29,9 +29,9 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
             return comments.Select(c => new Comment
             {
                 Id = Guid.Parse(c.Id),
+                UserId = Guid.Parse(c.UserId),
                 Content = c.Content,
                 PostId = Guid.Parse(c.PostId),
-                AuthorId = Guid.Parse(c.AuthorId),
                 CreatedAt = c.CreatedAt,
                 UpdatedAt = c.UpdatedAt
             }).ToList();
@@ -47,7 +47,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         Id = Guid.Parse(commentEntity.Id),
         //         Content = commentEntity.Content,
         //         PostId = Guid.Parse(commentEntity.PostId),
-        //         AuthorId = Guid.Parse(commentEntity.AuthorId),
         //         CreatedAt = commentEntity.CreatedAt,
         //         UpdatedAt = commentEntity.UpdatedAt
         //     };
@@ -62,7 +61,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         Id = Guid.Parse(c.Id),
         //         Content = c.Content,
         //         PostId = Guid.Parse(c.PostId),
-        //         AuthorId = Guid.Parse(c.AuthorId),
         //         CreatedAt = c.CreatedAt,
         //         UpdatedAt = c.UpdatedAt
         //     }).ToList();
@@ -75,7 +73,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         Id = comment.Id.ToString(),
         //         Content = comment.Content,
         //         PostId = comment.PostId.ToString(),
-        //         AuthorId = comment.AuthorId.ToString(),
         //         CreatedAt = DateTime.UtcNow,
         //         UpdatedAt = null
         //     };
@@ -91,7 +88,6 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Repositories
         //         Id = comment.Id.ToString(),
         //         Content = comment.Content,
         //         PostId = comment.PostId.ToString(),
-        //         AuthorId = comment.AuthorId.ToString(),
         //         CreatedAt = comment.CreatedAt,
         //         UpdatedAt = DateTime.UtcNow
         //     };

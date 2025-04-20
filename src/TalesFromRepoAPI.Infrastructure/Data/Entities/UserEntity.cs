@@ -20,6 +20,9 @@ namespace TalesFromRepoAPI.Infrastructure.Data.Entities
         public DateTime CreatedAt { get; set; }
 
         [DynamoDBProperty]
-        public List<string> Posts { get; set; } = new List<string>();
+        public DateTime UpdatedAt { get; set; }
+
+        [DynamoDBProperty]
+        public List<string> PostIds { get; set; } = new List<string>();
     }
 }

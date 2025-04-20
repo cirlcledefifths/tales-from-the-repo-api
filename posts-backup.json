@@ -19,9 +19,6 @@
             "Published": {
                 "BOOL": true
             },
-            "AuthorId": {
-                "S": "d4f8c9a7-2b3e-4f6a-8c1d-9e7b3a6d5f2c"
-            },
             "CreatedAt": {
                 "S": "2025-04-13T15:30:00Z"
             },

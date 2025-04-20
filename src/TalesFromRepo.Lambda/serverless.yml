@@ -52,34 +52,28 @@ functions:
           cors: true
           authorizer: aws_iam
 
-resources:
-  Resources:
-    PostsTable:
-      Type: 'AWS::DynamoDB::Table'
-      DeletionPolicy: Retain
-      Properties:
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions:
-          - AttributeName: id
-            AttributeType: S
-          - AttributeName: slug
-            AttributeType: S
-          - AttributeName: authorId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: id
-            KeyType: HASH
-        GlobalSecondaryIndexes:
-          - IndexName: slug-index
-            KeySchema:
-              - AttributeName: slug
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
-          - IndexName: author-index
-            KeySchema:
-              - AttributeName: authorId
-                KeyType: HASH
-            Projection:
-              ProjectionType: ALL
+# resources:
+#   Resources:
+#     PostsTable:
+#       Type: 'AWS::DynamoDB::Table'
+#       DeletionPolicy: Retain
+#       Properties:
+#         TableName: ${self:provider.environment.DYNAMODB_TABLE}
+#         BillingMode: PAY_PER_REQUEST
+#         AttributeDefinitions:
+#           - AttributeName: id
+#             AttributeType: S
+#           - AttributeName: slug
+#             AttributeType: S
+#         KeySchema:
+#           - AttributeName: id
+#             KeyType: HASH
+#         GlobalSecondaryIndexes:
+#           - IndexName: slug-index
+#             KeySchema:
+#               - AttributeName: slug
+#                 KeyType: HASH
+#             Projection:
+#               ProjectionType: ALL
+#             Projection:
+#               ProjectionType: ALL

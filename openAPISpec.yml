@@ -1,0 +1,24 @@
+openapi: 3.0.1
+info:
+  title: "tales-from-the-repo-api"
+  version: 24-11-13
+  description: "API Gateway for tales-from-the-repo-api."
+servers:
+  - url: "https://4dul2nhfd9.execute-api.us-east-2.amazonaws.com"
+    description: "API Gateway URL"
+paths:
+  /posts:
+    get:
+      description: "Get all blog posts"
+      responses:
+        200:
+          description: "List of blog posts"
+        500:
+          description: "Internal Server Error"
+      x-amazon-apigateway-integration:
+        type: "AWS_PROXY"
+        httpMethod: "POST"
+        uri: "arn:aws:lambda:us-east-2:623777241150:function:GetAllPosts/invocations"
+        credentials: "arn:aws:iam::623777241150:role/TalesFromRepoAPiGatewayRole"
+        passthroughBehavior: "when_no_match"
+        timeoutInMillis: 29000

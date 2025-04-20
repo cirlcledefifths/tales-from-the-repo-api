@@ -8,7 +8,8 @@ namespace TalesFromRepoAPI.Core.Models
         public Guid Id { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }
-        public DateTime CreatedAt { get; set; }
         public List<Post> Posts { get; set; } = new List<Post>(); // return default []
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
     }
 }

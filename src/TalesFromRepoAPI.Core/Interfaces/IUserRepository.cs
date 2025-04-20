@@ -10,7 +10,7 @@ namespace TalesFromRepoAPI.Core.Interfaces
         Task<List<User>> GetAllAsync();
         // Task<User> GetByIdAsync(Guid id);
         // Task<User> GetByUsernameAsync(string username);
-        // Task<User> CreateAsync(User user);
+        Task<User> CreateAsync(User user);
         // Task<User> UpdateAsync(User user);
         // Task<bool> DeleteAsync(Guid id);
     }
